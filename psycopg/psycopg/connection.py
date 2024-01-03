@@ -676,36 +676,7 @@ class Connection(BaseConnection[Row]):
         self.cursor_factory = Cursor
         self.server_cursor_factory = ServerCursor
 
-    @overload
     @classmethod
-    def connect(
-        cls,
-        conninfo: str = "",
-        *,
-        autocommit: bool = False,
-        row_factory: RowFactory[Row],
-        prepare_threshold: Optional[int] = 5,
-        cursor_factory: Optional[Type[Cursor[Row]]] = None,
-        context: Optional[AdaptContext] = None,
-        **kwargs: Union[None, int, str],
-    ) -> Self:
-        ...
-
-    @overload
-    @classmethod
-    def connect(
-        cls,
-        conninfo: str = "",
-        *,
-        autocommit: bool = False,
-        prepare_threshold: Optional[int] = 5,
-        cursor_factory: Optional[Type[Cursor[Any]]] = None,
-        context: Optional[AdaptContext] = None,
-        **kwargs: Union[None, int, str],
-    ) -> Self:
-        ...
-
-    @classmethod  # type: ignore[misc] # https://github.com/python/mypy/issues/11004
     def connect(
         cls,
         conninfo: str = "",
