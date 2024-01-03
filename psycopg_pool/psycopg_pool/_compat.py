@@ -6,10 +6,15 @@ compatibility functions for different Python versions
 
 import sys
 import asyncio
-from typing import Any, Awaitable, Generator, Optional, Union, Type, TypeVar
+from typing import Any, Awaitable, Generator, Optional, Union, Type
 from typing_extensions import TypeAlias
 
 import psycopg.errors as e
+
+if sys.version_info >= (3, 13):
+    from typing import TypeVar
+else:
+    from typing_extensions import TypeVar
 
 T = TypeVar("T")
 FutureT: TypeAlias = Union["asyncio.Future[T]", Generator[Any, None, T], Awaitable[T]]
@@ -42,6 +47,7 @@ __all__ = [
     "Deque",
     "Self",
     "Task",
+    "TypeVar",
     "create_task",
 ]
 

@@ -6,7 +6,7 @@ compatibility functions for different Python versions
 
 import sys
 import asyncio
-from typing import Any, Awaitable, Generator, Optional, Sequence, Union, TypeVar
+from typing import Any, Awaitable, Generator, Optional, Sequence, Union
 
 # NOTE: TypeAlias cannot be exported by this module, as pyright special-cases it.
 # For this raisin it must be imported directly from typing_extension where used.
@@ -17,6 +17,11 @@ if sys.version_info >= (3, 8):
     from typing import Protocol
 else:
     from typing_extensions import Protocol
+
+if sys.version_info >= (3, 13):
+    from typing import TypeVar
+else:
+    from typing_extensions import TypeVar
 
 T = TypeVar("T")
 FutureT: TypeAlias = Union["asyncio.Future[T]", Generator[Any, None, T], Awaitable[T]]
@@ -66,6 +71,7 @@ __all__ = [
     "Protocol",
     "Self",
     "TypeGuard",
+    "TypeVar",
     "ZoneInfo",
     "cache",
     "create_task",

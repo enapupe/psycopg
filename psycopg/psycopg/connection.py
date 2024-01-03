@@ -8,7 +8,7 @@ import logging
 import threading
 from types import TracebackType
 from typing import Any, Callable, cast, Generator, Generic, Iterator
-from typing import List, NamedTuple, Optional, Type, TypeVar, Tuple, Union
+from typing import List, NamedTuple, Optional, Type, Tuple, Union
 from typing import overload, TYPE_CHECKING
 from weakref import ref, ReferenceType
 from warnings import warn
@@ -28,7 +28,7 @@ from .rows import Row, RowFactory, tuple_row, TupleRow, args_row
 from .adapt import AdaptersMap
 from ._enums import IsolationLevel
 from .cursor import Cursor
-from ._compat import LiteralString, Self
+from ._compat import LiteralString, Self, TypeVar
 from .pq.misc import connection_summary
 from .conninfo import make_conninfo, conninfo_to_dict
 from .conninfo import conninfo_attempts, ConnDict, timeout_from_conninfo
