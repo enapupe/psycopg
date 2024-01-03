@@ -516,7 +516,6 @@ class ConnectionPool(BasePool[Connection[Any]]):
             kwargs["connect_timeout"] = max(round(timeout), 1)
         t0 = monotonic()
         try:
-            conn: Connection[Any]
             conn = self.connection_class.connect(self.conninfo, **kwargs)
         except Exception:
             self._stats[self._CONNECTIONS_ERRORS] += 1
