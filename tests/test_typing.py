@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pytest
 
@@ -409,6 +410,9 @@ reveal_type(ref)
     assert got == want
 
 
+@pytest.mark.xfail(
+    sys.version_info < (3, 8), reason="https://github.com/psycopg/psycopg/issues/308"
+)
 @pytest.mark.parametrize(
     "conn, type",
     [

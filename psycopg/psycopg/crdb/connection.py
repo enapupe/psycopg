@@ -5,10 +5,12 @@ CockroachDB-specific connections.
 # Copyright (C) 2022 The Psycopg Team
 
 import re
-from typing import Any, Optional, Union, TYPE_CHECKING
+import sys
+from typing import Any, Optional, Type, Union, overload, TYPE_CHECKING
 
 from .. import errors as e
-from ..rows import Row
+from ..abc import AdaptContext
+from ..rows import Row, RowFactory, AsyncRowFactory, TupleRow
 from ..connection import Connection
 from .._adapters_map import AdaptersMap
 from .._connection_info import ConnectionInfo
@@ -17,6 +19,8 @@ from ._types import adapters
 
 if TYPE_CHECKING:
     from ..pq.abc import PGconn
+    from ..cursor import Cursor
+    from ..cursor_async import AsyncCursor
 
 
 class _CrdbConnectionMixin:
@@ -59,6 +63,46 @@ class CrdbConnection(_CrdbConnectionMixin, Connection[Row]):
 
     __module__ = "psycopg.crdb"
 
+    if sys.version_info < (3, 8):
+        # TODO: this method shouldn't require re-definition if the base class
+        # implements a generic self.
+        # https://github.com/psycopg/psycopg/issues/308
+        @overload
+        @classmethod
+        def connect(
+            cls,
+            conninfo: str = "",
+            *,
+            autocommit: bool = False,
+            row_factory: RowFactory[Row],
+            prepare_threshold: Optional[int] = 5,
+            cursor_factory: "Optional[Type[Cursor[Row]]]" = None,
+            context: Optional[AdaptContext] = None,
+            **kwargs: Union[None, int, str],
+        ) -> "CrdbConnection[Row]":
+            ...
+
+        @overload
+        @classmethod
+        def connect(
+            cls,
+            conninfo: str = "",
+            *,
+            autocommit: bool = False,
+            prepare_threshold: Optional[int] = 5,
+            cursor_factory: "Optional[Type[Cursor[Any]]]" = None,
+            context: Optional[AdaptContext] = None,
+            **kwargs: Union[None, int, str],
+        ) -> "CrdbConnection[TupleRow]":
+            ...
+
+        @classmethod
+        def connect(cls, conninfo: str = "", **kwargs: Any) -> "CrdbConnection[Any]":
+            """
+            Connect to a database server and return a new `CrdbConnection` instance.
+            """
+            return super().connect(conninfo, **kwargs)  # type: ignore[return-value]
+
 
 class AsyncCrdbConnection(_CrdbConnectionMixin, AsyncConnection[Row]):
     """
@@ -66,6 +110,47 @@ class AsyncCrdbConnection(_CrdbConnectionMixin, AsyncConnection[Row]):
     """
 
     __module__ = "psycopg.crdb"
+
+    if sys.version_info < (3, 8):
+        # TODO: this method shouldn't require re-definition if the base class
+        # implements a generic self.
+        # https://github.com/psycopg/psycopg/issues/308
+        @overload
+        @classmethod
+        async def connect(
+            cls,
+            conninfo: str = "",
+            *,
+            autocommit: bool = False,
+            prepare_threshold: Optional[int] = 5,
+            row_factory: AsyncRowFactory[Row],
+            cursor_factory: "Optional[Type[AsyncCursor[Row]]]" = None,
+            context: Optional[AdaptContext] = None,
+            **kwargs: Union[None, int, str],
+        ) -> "AsyncCrdbConnection[Row]":
+            ...
+
+        @overload
+        @classmethod
+        async def connect(
+            cls,
+            conninfo: str = "",
+            *,
+            autocommit: bool = False,
+            prepare_threshold: Optional[int] = 5,
+            cursor_factory: "Optional[Type[AsyncCursor[Any]]]" = None,
+            context: Optional[AdaptContext] = None,
+            **kwargs: Union[None, int, str],
+        ) -> "AsyncCrdbConnection[TupleRow]":
+            ...
+
+        @classmethod
+        async def connect(
+            cls, conninfo: str = "", **kwargs: Any
+        ) -> "AsyncCrdbConnection[Any]":
+            return await super().connect(  # type: ignore[no-any-return]
+                conninfo, **kwargs
+            )
 
 
 class CrdbConnectionInfo(ConnectionInfo):

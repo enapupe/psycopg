@@ -33,6 +33,7 @@ from .server_cursor import AsyncServerCursor
 
 if TYPE_CHECKING:
     from .pq.abc import PGconn
+    from .rows import TupleRow
 
 TEXT = pq.Format.TEXT
 BINARY = pq.Format.BINARY
@@ -65,6 +66,37 @@ class AsyncConnection(BaseConnection[Row]):
         self.lock = asyncio.Lock()
         self.cursor_factory = AsyncCursor
         self.server_cursor_factory = AsyncServerCursor
+
+    if sys.version_info < (3, 8):
+
+        @overload
+        @classmethod
+        async def connect(
+            cls,
+            conninfo: str = "",
+            *,
+            autocommit: bool = False,
+            prepare_threshold: Optional[int] = 5,
+            row_factory: AsyncRowFactory[Row],
+            cursor_factory: Optional[Type[AsyncCursor[Row]]] = None,
+            context: Optional[AdaptContext] = None,
+            **kwargs: Union[None, int, str],
+        ) -> "AsyncConnection[Row]":
+            ...
+
+        @overload
+        @classmethod
+        async def connect(
+            cls,
+            conninfo: str = "",
+            *,
+            autocommit: bool = False,
+            prepare_threshold: Optional[int] = 5,
+            cursor_factory: Optional[Type[AsyncCursor[Any]]] = None,
+            context: Optional[AdaptContext] = None,
+            **kwargs: Union[None, int, str],
+        ) -> "AsyncConnection[TupleRow]":
+            ...
 
     @classmethod
     async def connect(

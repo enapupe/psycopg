@@ -4,6 +4,7 @@ psycopg connection objects
 
 # Copyright (C) 2020 The Psycopg Team
 
+import sys
 import logging
 import threading
 from types import TracebackType
@@ -43,6 +44,7 @@ from ._connection_info import ConnectionInfo
 if TYPE_CHECKING:
     from .pq.abc import PGconn, PGresult
     from psycopg_pool.base import BasePool
+    from .rows import TupleRow
 
 
 # Row Type variable for Cursor (when it needs to be distinguished from the
@@ -675,6 +677,39 @@ class Connection(BaseConnection[Row]):
         self.lock = threading.Lock()
         self.cursor_factory = Cursor
         self.server_cursor_factory = ServerCursor
+
+    if sys.version_info < (3, 8):
+        # With Python >= 3.8 we can use mypy 1.6, which understand Self
+        # and TypeVar default better.
+
+        @overload
+        @classmethod
+        def connect(
+            cls,
+            conninfo: str = "",
+            *,
+            autocommit: bool = False,
+            row_factory: RowFactory[Row],
+            prepare_threshold: Optional[int] = 5,
+            cursor_factory: Optional[Type[Cursor[Row]]] = None,
+            context: Optional[AdaptContext] = None,
+            **kwargs: Union[None, int, str],
+        ) -> "Connection[Row]":
+            ...
+
+        @overload
+        @classmethod
+        def connect(
+            cls,
+            conninfo: str = "",
+            *,
+            autocommit: bool = False,
+            prepare_threshold: Optional[int] = 5,
+            cursor_factory: Optional[Type[Cursor[Any]]] = None,
+            context: Optional[AdaptContext] = None,
+            **kwargs: Union[None, int, str],
+        ) -> "Connection[TupleRow]":
+            ...
 
     @classmethod
     def connect(
