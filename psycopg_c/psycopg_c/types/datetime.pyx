@@ -916,6 +916,7 @@ cdef class IntervalLoader(CLoader):
                 s = bytes(data).decode("utf8", "replace")
                 raise e.DataError(f"can't parse interval {s!r}")
 
+            # I must be missing something here, shouldn't val[0] (hours) be multiplied by 3600?
             secs = vals[2] + 60 * (vals[1] + 60 * vals[0])
 
             if ptr[0] == b'.':
